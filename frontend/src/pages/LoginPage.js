@@ -99,28 +99,31 @@ const LoginPage = ({ role }) => {
 
     useEffect(() => {
         if (status === 'success' || currentUser !== null) {
+            
+
+            localStorage.setItem('token', "Bearer " + "SJKNdjnwjnJNSJDBjnskjNJKBSsknSjd");
+
+            // Redirect user based on their role
             if (currentRole === 'Admin') {
                 navigate('/Admin/dashboard');
-            }
-            else if (currentRole === 'Student') {
+            } else if (currentRole === 'Student') {
                 navigate('/Student/dashboard');
             } else if (currentRole === 'Teacher') {
                 navigate('/Teacher/dashboard');
             }
-        }
-        else if (status === 'failed') {
-            setMessage(response)
-            setShowPopup(true)
-            setLoader(false)
-        }
-        else if (status === 'error') {
-            setMessage("Network Error")
-            setShowPopup(true)
-            setLoader(false)
-            setGuestLoader(false)
+        } else if (status === 'failed') {
+            setMessage(response);
+            setShowPopup(true);
+            setLoader(false);
+        } else if (status === 'error') {
+            setMessage("Network Error");
+            setShowPopup(true);
+            setLoader(false);
+            setGuestLoader(false);
         }
     }, [status, currentRole, navigate, error, response, currentUser]);
-
+    
+    
     return (
         <ThemeProvider theme={defaultTheme}>
             <Grid container component="main" sx={{ height: '100vh' }}>

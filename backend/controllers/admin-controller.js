@@ -7,6 +7,8 @@ const Subject = require('../models/subjectSchema.js');
 const Notice = require('../models/noticeSchema.js');
 const Complain = require('../models/complainSchema.js');
 
+const jwt = require('jsonwebtoken');
+
 // const adminRegister = async (req, res) => {
 //     try {
 //         const salt = await bcrypt.genSalt(10);
@@ -55,6 +57,8 @@ const Complain = require('../models/complainSchema.js');
 //     }
 // };
 
+const saltRounds = 10; // Number of salt rounds for bcrypt
+
 const adminRegister = async (req, res) => {
     try {
         const admin = new Admin({
@@ -66,11 +70,13 @@ const adminRegister = async (req, res) => {
 
         if (existingAdminByEmail) {
             res.send({ message: 'Email already exists' });
-        }
-        else if (existingSchool) {
+        } else if (existingSchool) {
             res.send({ message: 'School name already exists' });
-        }
-        else {
+        } else {
+            // Hash the password before saving it
+            const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+            admin.password = hashedPassword;
+
             let result = await admin.save();
             result.password = undefined;
             res.send(result);
@@ -80,11 +86,16 @@ const adminRegister = async (req, res) => {
     }
 };
 
+
 const adminLogIn = async (req, res) => {
     if (req.body.email && req.body.password) {
         let admin = await Admin.findOne({ email: req.body.email });
+
         if (admin) {
-            if (req.body.password === admin.password) {
+            // Compare hashed password with plain text password using bcrypt
+            const passwordMatch = await bcrypt.compare(req.body.password, admin.password);
+
+            if (passwordMatch) {
                 admin.password = undefined;
                 res.send(admin);
             } else {
@@ -97,6 +108,7 @@ const adminLogIn = async (req, res) => {
         res.send({ message: "Email and password are required" });
     }
 };
+
 
 const getAdminDetail = async (req, res) => {
     try {
